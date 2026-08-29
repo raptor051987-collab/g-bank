@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>G-BANK — Банк нового поколения</title>
+  <meta name="description" content="G-BANK — цифровой банк с характером.">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:Arial,Helvetica,sans-serif;
+      background:#07100b;
+      color:#f5f0d0;
+      min-height:100vh;
+    }
+    .wrap{max-width:1100px;margin:auto;padding:0 24px}
+    header{
+      display:flex;justify-content:space-between;align-items:center;
+      padding:24px 0;border-bottom:1px solid rgba(214,177,55,.2)
+    }
+    .logo{font-size:30px;font-weight:900;letter-spacing:2px;color:#e7c84b}
+    nav a{color:#d8d5c2;text-decoration:none;margin-left:24px;font-size:14px}
+    nav a:hover{color:#e7c84b}
+    .hero{padding:90px 0 70px;text-align:center}
+    .badge{
+      display:inline-block;padding:8px 14px;border:1px solid #4e8b43;
+      border-radius:999px;color:#8fc77d;font-size:13px;margin-bottom:22px
+    }
+    h1{font-size:clamp(55px,10vw,110px);line-height:.9;letter-spacing:-5px}
+    h1 span{color:#5ea64e}
+    .hero p{max-width:620px;margin:28px auto;color:#aaa997;font-size:18px;line-height:1.6}
+    .btn{
+      display:inline-block;background:#e7c84b;color:#10140d;
+      text-decoration:none;font-weight:800;padding:15px 25px;border-radius:10px;
+      margin-top:10px
+    }
+    .card{
+      background:linear-gradient(145deg,#122018,#0b140f);
+      border:1px solid rgba(214,177,55,.25);border-radius:22px;
+      padding:35px;box-shadow:0 20px 70px rgba(0,0,0,.35)
+    }
+    .bank-card{max-width:620px;margin:20px auto 80px;min-height:300px;position:relative;overflow:hidden}
+    .bank-card:after{
+      content:"";position:absolute;width:250px;height:250px;border-radius:50%;
+      background:#285d2b;right:-90px;top:-90px;opacity:.35
+    }
+    .chip{width:48px;height:38px;border-radius:7px;background:#d6b137;margin-bottom:70px}
+    .card-title{font-size:28px;font-weight:900;letter-spacing:2px}
+    .card-number{margin-top:24px;font-size:20px;letter-spacing:5px;color:#c9c5ae}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:80px}
+    .grid h3{color:#e7c84b;margin-bottom:12px}
+    .grid p{color:#9f9e91;line-height:1.5}
+    footer{border-top:1px solid rgba(214,177,55,.15);padding:28px 0;color:#77796f;font-size:13px}
+    @media(max-width:700px){
+      nav{display:none}.hero{padding-top:65px}.grid{grid-template-columns:1fr}
+      h1{letter-spacing:-3px}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo">G-BANK</div>
+      <nav>
+        <a href="#about">О банке</a>
+        <a href="#card">Карта</a>
+        <a href="#community">Комьюнити</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="badge">G-BANK • DIGITAL COMMUNITY</div>
+        <h1>G-<span>BANK</span></h1>
+        <p>Банк нового поколения. Свой стиль. Свои правила. Своя история.</p>
+        <a class="btn" href="#community">Войти в G-BANK</a>
+      </section>
+
+      <section id="card" class="card bank-card">
+        <div class="chip"></div>
+        <div class="card-title">G-BANK</div>
+        <div class="card-number">0000 • 0000 • 0000 • 0001</div>
+      </section>
+
+      <section id="about" class="grid">
+        <div class="card">
+          <h3>G-CARD</h3>
+          <p>Фирменная виртуальная карта G-BANK. Пока это концепт — но история только начинается.</p>
+        </div>
+        <div class="card">
+          <h3>G-COIN</h3>
+          <p>Внутренняя виртуальная валюта для будущих событий и механик сообщества.</p>
+        </div>
+        <div class="card">
+          <h3>G-COMMUNITY</h3>
+          <p>Место, где участники следят за новостями, событиями и развитием G-BANK.</p>
+        </div>
+      </section>
+
+      <section id="community" class="hero" style="padding-top:20px">
+        <div class="badge">Скоро</div>
+        <h2 style="font-size:42px;margin-bottom:18px">Добро пожаловать в G-BANK</h2>
+        <p>Telegram и другие официальные площадки появятся здесь.</p>
+        <a class="btn" href="#">Telegram G-BANK</a>
+      </section>
+    </main>
+
+    <footer>
+      © 2026 G-BANK. Виртуальный развлекательный проект. Не является банком и не оказывает банковские услуги.
+    </footer>
+  </div>
+</body>
+</html>
