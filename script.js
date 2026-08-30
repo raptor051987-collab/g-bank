@@ -63,8 +63,12 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     document.getElementById("transferBtn").addEventListener("click", function () {
-        alert("💸 Переводы пока находятся в разработке.");
-    });
+    const box = document.getElementById("transferBox");
+
+    if (!box) return;
+
+    box.style.display = "block";
+});
 
     document.getElementById("historyBtn").addEventListener("click", function () {
         alert("📊 История операций\n\nПока операций нет.");
