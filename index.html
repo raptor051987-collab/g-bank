@@ -80,7 +80,39 @@
   <h3 id="balance"></h3>
 
   <div style="margin-top:25px;">
-    <button class="btn" id="cardBtn">💳 Моя карта</button>
+    <div id="myCard" style="display:none; margin-top:30px;">
+  <div style="
+    background:linear-gradient(135deg,#1b3d22,#0b160f);
+    border:1px solid #d6b137;
+    border-radius:20px;
+    padding:30px;
+    max-width:520px;
+    min-height:280px;
+    margin:auto;
+    text-align:left;
+    box-shadow:0 15px 50px rgba(0,0,0,.4);
+  ">
+    <div style="color:#e7c84b;font-size:24px;font-weight:900;">
+      G-BANK
+    </div>
+
+    <div style="margin-top:50px;font-size:24px;letter-spacing:4px;">
+      0000 • 0000 • 0000 • 0001
+    </div>
+
+    <div style="display:flex;justify-content:space-between;margin-top:35px;">
+      <div>
+        <small style="color:#999;">ВЛАДЕЛЕЦ</small>
+        <div id="cardName"></div>
+      </div>
+
+      <div>
+        <small style="color:#999;">ДЕЙСТВИТЕЛЬНА ДО</small>
+        <div>12/30</div>
+      </div>
+    </div>
+  </div>
+</div>
     <button class="btn" id="transferBtn">💸 Перевести</button>
     <button class="btn" id="historyBtn">📊 История</button>
     <button class="btn" id="logoutBtn">🚪 Выйти</button>
