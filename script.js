@@ -4,8 +4,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // 🏦 ОТКРЫТИЕ СЧЁТА
 
-        const openButton =
-            event.target.closest('a[href="#cabinet"]');
+        const openButton = event.target.closest('a[href="#cabinet"]');
 
         if (openButton) {
 
@@ -19,38 +18,25 @@ document.addEventListener("DOMContentLoaded", function () {
                     "🏦 G-BANK\n\nВведите ваше имя:"
                 );
 
-                if (!name || !name.trim()) {
-                    alert("Имя не введено.");
-                    return;
-                }
+                if (!name || !name.trim()) return;
 
                 const password = prompt(
                     "Придумайте пароль для G-BANK:"
                 );
 
                 if (!password || password.length < 4) {
-                    alert(
-                        "Пароль должен содержать минимум 4 символа."
-                    );
+                    alert("Пароль должен содержать минимум 4 символа.");
                     return;
                 }
 
                 user = name.trim();
 
-                localStorage.setItem(
-                    "gBankUser",
-                    user
-                );
+                localStorage.setItem("gBankUser", user);
+                localStorage.setItem("gBankBalance", "12480");
 
-                localStorage.setItem(
-                    "gBankBalance",
-                    "12480"
-                );
-
-                localStorage.setItem(
-                    "gBankHistory",
-                    JSON.stringify([])
-                );
+                if (!localStorage.getItem("gBankHistory")) {
+                    localStorage.setItem("gBankHistory", "[]");
+                }
 
                 alert(
                     "🎉 Счёт G-BANK создан!\n\n" +
@@ -64,28 +50,18 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
 
-        // 💳 МОЯ КАРТА
+        // 💳 КАРТА
 
-        const cardButton =
-            event.target.closest("#cardBtn");
+        if (event.target.closest("#cardBtn")) {
 
-        if (cardButton) {
+            const card = document.getElementById("myCard");
+            const cardName = document.getElementById("cardName");
 
-            const card =
-                document.getElementById("myCard");
-
-            const cardName =
-                document.getElementById("cardName");
-
-            const user =
-                localStorage.getItem("gBankUser");
-
-            if (card) {
-                card.style.display = "block";
-            }
+            if (card) card.style.display = "block";
 
             if (cardName) {
-                cardName.textContent = user || "";
+                cardName.textContent =
+                    localStorage.getItem("gBankUser") || "";
             }
 
             return;
@@ -94,13 +70,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // 💸 ПЕРЕВЕСТИ
 
-        const transferButton =
-            event.target.closest("#transferBtn");
+        if (event.target.closest("#transferBtn")) {
 
-        if (transferButton) {
-
-            const box =
-                document.getElementById("transferBox");
+            const box = document.getElementById("transferBox");
 
             if (box) {
                 box.style.display = "block";
@@ -110,64 +82,35 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
 
-        // 💸 ОТПРАВИТЬ ПЕРЕВОД
+        // 💸 ОТПРАВИТЬ
 
-        const sendButton =
-            event.target.closest("#sendTransfer");
-
-        if (sendButton) {
-
-            const recipientInput =
-                document.getElementById("recipient");
-
-            const amountInput =
-                document.getElementById("transferAmount");
+        if (event.target.closest("#sendTransfer")) {
 
             const recipient =
-                recipientInput
-                    ? recipientInput.value.trim()
-                    : "";
+                document.getElementById("recipient").value.trim();
 
             const amount =
-                amountInput
-                    ? Number(amountInput.value)
-                    : 0;
-
+                Number(document.getElementById("transferAmount").value);
 
             if (!recipient) {
                 alert("Введите имя получателя.");
                 return;
             }
 
-
             if (!amount || amount <= 0) {
                 alert("Введите корректную сумму.");
                 return;
             }
 
-
             const balance =
-                Number(
-                    localStorage.getItem(
-                        "gBankBalance"
-                    ) || 0
-                );
-
+                Number(localStorage.getItem("gBankBalance") || 0);
 
             if (amount > balance) {
-                alert(
-                    "❌ Недостаточно средств.\n\n" +
-                    "Ваш баланс: " +
-                    balance.toLocaleString("ru-RU") +
-                    " G-COIN"
-                );
+                alert("❌ Недостаточно средств.");
                 return;
             }
 
-
-            const newBalance =
-                balance - amount;
-
+            const newBalance = balance - amount;
 
             localStorage.setItem(
                 "gBankBalance",
@@ -175,30 +118,18 @@ document.addEventListener("DOMContentLoaded", function () {
             );
 
 
-            // 📊 СОХРАНЯЕМ ОПЕРАЦИЮ
+            // 📊 СОХРАНЯЕМ ИСТОРИЮ
 
-            let history =
-                JSON.parse(
-                    localStorage.getItem(
-                        "gBankHistory"
-                    ) || "[]"
-                );
-
+            let history = JSON.parse(
+                localStorage.getItem("gBankHistory") || "[]"
+            );
 
             history.unshift({
-
-                type: "transfer",
-
+                type: "Перевод",
                 recipient: recipient,
-
                 amount: amount,
-
-                date: new Date().toLocaleString(
-                    "ru-RU"
-                )
-
+                date: new Date().toLocaleString("ru-RU")
             });
-
 
             localStorage.setItem(
                 "gBankHistory",
@@ -206,25 +137,15 @@ document.addEventListener("DOMContentLoaded", function () {
             );
 
 
-            // ОБНОВЛЯЕМ БАЛАНС
-
-            const balanceElement =
-                document.getElementById("balance");
-
-            if (balanceElement) {
-
-                balanceElement.textContent =
-                    "💰 Баланс: " +
-                    newBalance.toLocaleString("ru-RU") +
-                    " G-COIN";
-            }
+            document.getElementById("balance").textContent =
+                "💰 Баланс: " +
+                newBalance.toLocaleString("ru-RU") +
+                " G-COIN";
 
 
             alert(
                 "✅ Перевод выполнен!\n\n" +
-                "Получатель: " +
-                recipient +
-                "\n" +
+                "Получатель: " + recipient + "\n" +
                 "Сумма: " +
                 amount.toLocaleString("ru-RU") +
                 " G-COIN\n\n" +
@@ -234,83 +155,95 @@ document.addEventListener("DOMContentLoaded", function () {
             );
 
 
-            if (recipientInput) {
-                recipientInput.value = "";
-            }
-
-            if (amountInput) {
-                amountInput.value = "";
-            }
+            document.getElementById("recipient").value = "";
+            document.getElementById("transferAmount").value = "";
 
             return;
         }
 
 
-        // 📊 ИСТОРИЯ ОПЕРАЦИЙ
+        // 📊 ИСТОРИЯ
 
-        const historyButton =
-            event.target.closest("#historyBtn");
+        if (event.target.closest("#historyBtn")) {
 
-        if (historyButton) {
+            const historyBox =
+                document.getElementById("historyBox");
 
-            let history =
-                JSON.parse(
-                    localStorage.getItem(
-                        "gBankHistory"
-                    ) || "[]"
-                );
+            const historyList =
+                document.getElementById("historyList");
+
+
+            if (!historyBox || !historyList) return;
+
+
+            let history = JSON.parse(
+                localStorage.getItem("gBankHistory") || "[]"
+            );
+
+
+            historyBox.style.display = "block";
 
 
             if (history.length === 0) {
 
-                alert(
-                    "📊 История операций\n\n" +
-                    "Операций пока нет."
-                );
+                historyList.innerHTML =
+                    '<p style="color:#999;">Операций пока нет.</p>';
 
                 return;
             }
 
 
-            let text =
-                "📊 ИСТОРИЯ ОПЕРАЦИЙ\n\n";
+            historyList.innerHTML = "";
 
 
-            history.forEach(function (operation, index) {
+            history.forEach(function (operation) {
 
-                text +=
-                    (index + 1) +
-                    ". 🔴 Перевод\n" +
-                    "Получатель: " +
+                const item =
+                    document.createElement("div");
+
+                item.style.padding = "15px 0";
+                item.style.borderBottom =
+                    "1px solid rgba(255,255,255,.08)";
+
+                item.innerHTML =
+                    '<div style="font-weight:800;">' +
+                    '🔴 ' + operation.type +
+                    '</div>' +
+
+                    '<div style="margin-top:6px;color:#aaa;">' +
+                    'Получатель: ' +
                     operation.recipient +
-                    "\n" +
-                    "Сумма: −" +
+                    '</div>' +
+
+                    '<div style="margin-top:6px;color:#e7c84b;font-weight:700;">' +
+                    '−' +
                     operation.amount.toLocaleString("ru-RU") +
-                    " G-COIN\n" +
-                    "Дата: " +
+                    ' G-COIN' +
+                    '</div>' +
+
+                    '<div style="margin-top:6px;color:#777;">' +
                     operation.date +
-                    "\n\n";
+                    '</div>';
+
+                historyList.appendChild(item);
 
             });
 
 
-            alert(text);
+            historyBox.scrollIntoView({
+                behavior: "smooth"
+            });
 
             return;
         }
 
 
-        // 🚪 ВЫХОД
+        // 🚪 ВЫЙТИ
 
-        const logoutButton =
-            event.target.closest("#logoutBtn");
-
-        if (logoutButton) {
+        if (event.target.closest("#logoutBtn")) {
 
             localStorage.removeItem("gBankUser");
             localStorage.removeItem("gBankBalance");
-
-            alert("Вы вышли из G-BANK.");
 
             const cabinet =
                 document.getElementById("cabinet");
@@ -343,9 +276,7 @@ document.addEventListener("DOMContentLoaded", function () {
             cabinet.style.display = "block";
         }
 
-
         if (welcome) {
-
             welcome.textContent =
                 "Добро пожаловать, " +
                 user +
@@ -355,9 +286,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const balance =
             Number(
-                localStorage.getItem(
-                    "gBankBalance"
-                ) || 12480
+                localStorage.getItem("gBankBalance") || 12480
             );
 
 
