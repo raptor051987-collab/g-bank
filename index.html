@@ -114,7 +114,32 @@
   </div>
 </div>
     <button class="btn" id="cardBtn">💳 Моя карта</button>
-    <button class="btn" id="transferBtn">💸 Перевести</button>
+    <button class="btn" id="transferBtn">💸 Перевести</button><div id="transferBox" style="display:none; margin-top:25px; padding:25px; background:#0b140f; border:1px solid rgba(214,177,55,.25); border-radius:15px;">
+
+  <h3 style="color:#e7c84b; margin-bottom:20px;">
+    💸 Перевод G-COIN
+  </h3>
+
+  <input
+    id="recipient"
+    type="text"
+    placeholder="Имя получателя"
+    style="display:block; width:100%; padding:14px; margin-bottom:12px; border-radius:8px; border:1px solid #555; background:#07100b; color:white;"
+  >
+
+  <input
+    id="transferAmount"
+    type="number"
+    placeholder="Сумма G-COIN"
+    min="1"
+    style="display:block; width:100%; padding:14px; margin-bottom:15px; border-radius:8px; border:1px solid #555; background:#07100b; color:white;"
+  >
+
+  <button class="btn" id="sendTransfer">
+    Отправить
+  </button>
+
+</div>
     <button class="btn" id="historyBtn">📊 История</button>
     <button class="btn" id="logoutBtn">🚪 Выйти</button>
   </div>
