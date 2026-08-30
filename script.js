@@ -2,8 +2,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const button = document.querySelector('a[href="#cabinet"]');
     const cabinet = document.getElementById("cabinet");
-    const welcome = document.getElementById("welcome");
-    const balance = document.getElementById("balance");
 
     if (!button || !cabinet) return;
 
@@ -19,10 +17,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const name = prompt("🐦 G-BANK\n\nВведите ваше имя:");
 
-        if (!name || !name.trim()) {
-            alert("Имя не введено.");
-            return;
-        }
+        if (!name || !name.trim()) return;
 
         const password = prompt("Придумайте пароль для G-BANK:");
 
@@ -38,19 +33,33 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     function showCabinet(name) {
-        const savedBalance = localStorage.getItem("gBankBalance") || "12480";
+        const balance = localStorage.getItem("gBankBalance") || "12480";
 
         cabinet.style.display = "block";
-        welcome.textContent = "Добро пожаловать, " + name + "!";
-        balance.textContent = "💰 Баланс: " + Number(savedBalance).toLocaleString("ru-RU") + " G-COIN";
 
-        cabinet.scrollIntoView({
-            behavior: "smooth"
-        });
+        document.getElementById("welcome").textContent =
+            "Добро пожаловать, " + name + "!";
+
+        document.getElementById("balance").textContent =
+            "💰 Баланс: " +
+            Number(balance).toLocaleString("ru-RU") +
+            " G-COIN";
+
+        cabinet.scrollIntoView({ behavior: "smooth" });
     }
 
     document.getElementById("cardBtn").addEventListener("click", function () {
-        alert("💳 G-CARD\n\n0000 • 0000 • 0000 • 0001");
+
+        const card = document.getElementById("myCard");
+        const cardName = document.getElementById("cardName");
+        const user = localStorage.getItem("gBankUser");
+
+        if (!card || !user) return;
+
+        cardName.textContent = user;
+        card.style.display = "block";
+
+        card.scrollIntoView({ behavior: "smooth" });
     });
 
     document.getElementById("transferBtn").addEventListener("click", function () {
