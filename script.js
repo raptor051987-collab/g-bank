@@ -1,3 +1,4 @@
+alert("НОВЫЙ G-BANK SCRIPT");
 document.addEventListener("DOMContentLoaded", function () {
 
     const button = document.querySelector('a[href="#cabinet"]');
