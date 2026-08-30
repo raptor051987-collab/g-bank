@@ -33,6 +33,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     function showCabinet(name) {
+
         const balance = localStorage.getItem("gBankBalance") || "12480";
 
         cabinet.style.display = "block";
@@ -45,8 +46,13 @@ document.addEventListener("DOMContentLoaded", function () {
             Number(balance).toLocaleString("ru-RU") +
             " G-COIN";
 
-        cabinet.scrollIntoView({ behavior: "smooth" });
+        cabinet.scrollIntoView({
+            behavior: "smooth"
+        });
     }
+
+
+    // 💳 МОЯ КАРТА
 
     document.getElementById("cardBtn").addEventListener("click", function () {
 
@@ -59,28 +65,49 @@ document.addEventListener("DOMContentLoaded", function () {
         cardName.textContent = user;
         card.style.display = "block";
 
-        card.scrollIntoView({ behavior: "smooth" });
+        card.scrollIntoView({
+            behavior: "smooth"
+        });
+
     });
+
+
+    // 💸 ПЕРЕВОД
 
     document.getElementById("transferBtn").addEventListener("click", function () {
-    const box = document.getElementById("transferBox");
 
-    if (!box) return;
+        const box = document.getElementById("transferBox");
 
-    box.style.display = "block";
-});
+        if (!box) return;
 
-    document.getElementById("historyBtn").addEventListener("click", function () {
-        alert("📊 История операций\n\nПока операций нет.");
+        box.style.display = "block";
+
     });
 
+
+    // 📊 ИСТОРИЯ
+
+    document.getElementById("historyBtn").addEventListener("click", function () {
+
+        alert(
+            "📊 История операций\n\n" +
+            "Пока операций нет."
+        );
+
+    });
+
+
+    // 🚪 ВЫХОД
+
     document.getElementById("logoutBtn").addEventListener("click", function () {
+
         localStorage.removeItem("gBankUser");
         localStorage.removeItem("gBankBalance");
 
         cabinet.style.display = "none";
 
         alert("Вы вышли из G-BANK.");
+
     });
 
 });
