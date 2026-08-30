@@ -1,10 +1,11 @@
 document.addEventListener("DOMContentLoaded", function () {
 
-    // 🏦 ОТКРЫТИЕ СЧЁТА
-
     document.addEventListener("click", function (event) {
 
-        const openButton = event.target.closest('a[href="#cabinet"]');
+        // 🏦 ОТКРЫТИЕ СЧЁТА
+
+        const openButton =
+            event.target.closest('a[href="#cabinet"]');
 
         if (openButton) {
 
@@ -44,6 +45,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 localStorage.setItem(
                     "gBankBalance",
                     "12480"
+                );
+
+                localStorage.setItem(
+                    "gBankHistory",
+                    JSON.stringify([])
                 );
 
                 alert(
@@ -104,7 +110,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
 
-        // 💸 ОТПРАВИТЬ
+        // 💸 ОТПРАВИТЬ ПЕРЕВОД
 
         const sendButton =
             event.target.closest("#sendTransfer");
@@ -169,6 +175,39 @@ document.addEventListener("DOMContentLoaded", function () {
             );
 
 
+            // 📊 СОХРАНЯЕМ ОПЕРАЦИЮ
+
+            let history =
+                JSON.parse(
+                    localStorage.getItem(
+                        "gBankHistory"
+                    ) || "[]"
+                );
+
+
+            history.unshift({
+
+                type: "transfer",
+
+                recipient: recipient,
+
+                amount: amount,
+
+                date: new Date().toLocaleString(
+                    "ru-RU"
+                )
+
+            });
+
+
+            localStorage.setItem(
+                "gBankHistory",
+                JSON.stringify(history)
+            );
+
+
+            // ОБНОВЛЯЕМ БАЛАНС
+
             const balanceElement =
                 document.getElementById("balance");
 
@@ -207,17 +246,55 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
 
-        // 📊 ИСТОРИЯ
+        // 📊 ИСТОРИЯ ОПЕРАЦИЙ
 
         const historyButton =
             event.target.closest("#historyBtn");
 
         if (historyButton) {
 
-            alert(
-                "📊 История операций\n\n" +
-                "Операций пока нет."
-            );
+            let history =
+                JSON.parse(
+                    localStorage.getItem(
+                        "gBankHistory"
+                    ) || "[]"
+                );
+
+
+            if (history.length === 0) {
+
+                alert(
+                    "📊 История операций\n\n" +
+                    "Операций пока нет."
+                );
+
+                return;
+            }
+
+
+            let text =
+                "📊 ИСТОРИЯ ОПЕРАЦИЙ\n\n";
+
+
+            history.forEach(function (operation, index) {
+
+                text +=
+                    (index + 1) +
+                    ". 🔴 Перевод\n" +
+                    "Получатель: " +
+                    operation.recipient +
+                    "\n" +
+                    "Сумма: −" +
+                    operation.amount.toLocaleString("ru-RU") +
+                    " G-COIN\n" +
+                    "Дата: " +
+                    operation.date +
+                    "\n\n";
+
+            });
+
+
+            alert(text);
 
             return;
         }
@@ -233,6 +310,8 @@ document.addEventListener("DOMContentLoaded", function () {
             localStorage.removeItem("gBankUser");
             localStorage.removeItem("gBankBalance");
 
+            alert("Вы вышли из G-BANK.");
+
             const cabinet =
                 document.getElementById("cabinet");
 
@@ -240,15 +319,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 cabinet.style.display = "none";
             }
 
-            alert("Вы вышли из G-BANK.");
-
             return;
         }
 
     });
 
 
-    // 👤 ПОКАЗАТЬ КАБИНЕТ
+    // 👤 ПОКАЗ КАБИНЕТА
 
     function showCabinet(user) {
 
@@ -268,6 +345,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
         if (welcome) {
+
             welcome.textContent =
                 "Добро пожаловать, " +
                 user +
