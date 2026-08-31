@@ -73,7 +73,72 @@
         <div class="badge">G-BANK • DIGITAL COMMUNITY</div>
         <h1>G-<span>BANK</span></h1>
         <p>Банк нового поколения. Свой стиль. Свои правила. Своя история.</p>
-        <a class="btn" href="#cabinet">Открыть счёт</a>
+        <button class="btn" id="loginOpenBtn">🔐 Войти</button>
+        <div id="authBox" style="display:none; max-width:450px; margin:35px auto; padding:30px; background:#0b140f; border:1px solid rgba(214,177,55,.25); border-radius:18px;">
+
+  <h2 id="authTitle" style="color:#e7c84b; margin-bottom:25px;">
+    🔐 Вход в G-BANK
+  </h2>
+
+  <input
+    id="loginName"
+    type="text"
+    placeholder="Имя клиента"
+    style="display:block; width:100%; padding:14px; margin-bottom:12px; border-radius:8px; border:1px solid #555; background:#07100b; color:white;"
+  >
+          <input
+  id="loginPassword"
+  type="password"
+  placeholder="Пароль"
+  style="display:block; width:100%; padding:14px; margin-bottom:15px; border-radius:8px; border:1px solid #555; background:#07100b; color:white;"
+>
+
+<input
+  id="registerPassword"
+  type="password"
+  placeholder="Повторите пароль"
+  style="display:none; width:100%; padding:14px; margin-bottom:15px; border-radius:8px; border:1px solid #555; background:#07100b; color:white;"
+>
+
+<button class="btn" id="authActionBtn">
+  Войти
+</button>
+
+<button
+  id="switchAuthBtn"
+  style="display:block; margin:18px auto 0; background:none; border:0; color:#8fc77d; cursor:pointer;"
+>
+  Нет аккаунта? Зарегистрироваться
+</button>
+
+</div>
+
+  <input
+    id="loginPassword"
+    type="password"
+    placeholder="Пароль"
+    style="display:block; width:100%; padding:14px; margin-bottom:15px; border-radius:8px; border:1px solid #555; background:#07100b; color:white;"
+  >
+
+  <input
+    id="registerPassword"
+    type="password"
+    placeholder="Повторите пароль"
+    style="display:none; width:100%; padding:14px; margin-bottom:15px; border-radius:8px; border:1px solid #555; background:#07100b; color:white;"
+  >
+
+  <button class="btn" id="authActionBtn">
+    Войти
+  </button>
+
+  <button
+    id="switchAuthBtn"
+    style="display:block; margin:18px auto 0; background:none; border:0; color:#8fc77d; cursor:pointer;"
+  >
+    Нет аккаунта? Зарегистрироваться
+  </button>
+
+</div>
         <div id="cabinet" class="card" style="display:none; margin:40px auto; max-width:700px;">
   <h2>Личный кабинет G-BANK</h2>
   <p id="welcome"></p>
