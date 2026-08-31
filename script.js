@@ -27,6 +27,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 localStorage.setItem("gBankUser", user);
                 localStorage.setItem("gBankBalance", "12480");
 
+                if (!localStorage.getItem("gBankHistory")) {
+                    localStorage.setItem("gBankHistory", "[]");
+                }
+
                 alert(
                     "🎉 Счёт G-BANK создан!\n\n" +
                     "Клиент: " + user + "\n" +
@@ -58,10 +62,23 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
 
-        // 💸 ОТКРЫТЬ ПЕРЕВОД
+        // 💸 ПЕРЕВЕСТИ
         if (event.target.closest("#transferBtn")) {
 
             const box = document.getElementById("transferBox");
+
+            if (box) {
+                box.style.display = "block";
+            }
+
+            return;
+        }
+
+
+        // 💰 ПОПОЛНИТЬ
+        if (event.target.closest("#depositBtn")) {
+
+            const box = document.getElementById("depositBox");
 
             if (box) {
                 box.style.display = "block";
@@ -116,8 +133,9 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
 
-            // 💰 НОВЫЙ БАЛАНС
-            const newBalance = balance - amount;
+            const newBalance =
+                balance - amount;
+
 
             localStorage.setItem(
                 "gBankBalance",
@@ -125,47 +143,20 @@ document.addEventListener("DOMContentLoaded", function () {
             );
 
 
-            // 📊 СОХРАНЯЕМ ИСТОРИЮ
-            let history = [];
-
-            try {
-                history = JSON.parse(
-                    localStorage.getItem("gBankHistory") || "[]"
-                );
-
-                if (!Array.isArray(history)) {
-                    history = [];
-                }
-
-            } catch (error) {
-                history = [];
-            }
-
+            // 📊 СОХРАНЯЕМ ПЕРЕВОД В ИСТОРИЮ
+            let history = getHistory();
 
             history.unshift({
-                type: "Перевод",
+                type: "transfer",
                 recipient: recipient,
                 amount: amount,
                 date: new Date().toLocaleString("ru-RU")
             });
 
-
-            localStorage.setItem(
-                "gBankHistory",
-                JSON.stringify(history)
-            );
+            saveHistory(history);
 
 
-            // 🔄 ОБНОВЛЯЕМ БАЛАНС НА ЭКРАНЕ
-            const balanceElement =
-                document.getElementById("balance");
-
-            if (balanceElement) {
-                balanceElement.textContent =
-                    "💰 Баланс: " +
-                    newBalance.toLocaleString("ru-RU") +
-                    " G-COIN";
-            }
+            updateBalance(newBalance);
 
 
             alert(
@@ -181,6 +172,70 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
             recipientInput.value = "";
+            amountInput.value = "";
+
+            return;
+        }
+
+
+        // 💰 ПОПОЛНИТЬ БАЛАНС
+        if (event.target.closest("#sendDeposit")) {
+
+            const amountInput =
+                document.getElementById("depositAmount");
+
+            const amount =
+                Number(amountInput.value);
+
+
+            if (!amount || amount <= 0) {
+                alert("Введите корректную сумму.");
+                return;
+            }
+
+
+            const balance =
+                Number(
+                    localStorage.getItem("gBankBalance") || 0
+                );
+
+
+            const newBalance =
+                balance + amount;
+
+
+            localStorage.setItem(
+                "gBankBalance",
+                String(newBalance)
+            );
+
+
+            // 📊 СОХРАНЯЕМ ПОПОЛНЕНИЕ
+            let history = getHistory();
+
+            history.unshift({
+                type: "deposit",
+                amount: amount,
+                date: new Date().toLocaleString("ru-RU")
+            });
+
+            saveHistory(history);
+
+
+            updateBalance(newBalance);
+
+
+            alert(
+                "✅ Баланс пополнен!\n\n" +
+                "Зачислено: +" +
+                amount.toLocaleString("ru-RU") +
+                " G-COIN\n\n" +
+                "Новый баланс: " +
+                newBalance.toLocaleString("ru-RU") +
+                " G-COIN"
+            );
+
+
             amountInput.value = "";
 
             return;
@@ -203,20 +258,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
 
-            let history = [];
-
-            try {
-                history = JSON.parse(
-                    localStorage.getItem("gBankHistory") || "[]"
-                );
-
-                if (!Array.isArray(history)) {
-                    history = [];
-                }
-
-            } catch (error) {
-                history = [];
-            }
+            const history = getHistory();
 
 
             historyBox.style.display = "block";
@@ -251,46 +293,87 @@ document.addEventListener("DOMContentLoaded", function () {
                     "1px solid rgba(255,255,255,.08)";
 
 
-                item.innerHTML = `
-                    <div style="
-                        display:flex;
-                        justify-content:space-between;
-                        align-items:center;
-                    ">
-                        <div>
+                if (operation.type === "deposit") {
+
+                    item.innerHTML = `
+                        <div style="
+                            display:flex;
+                            justify-content:space-between;
+                            align-items:center;
+                        ">
+                            <div>
+                                <div style="
+                                    font-size:17px;
+                                    font-weight:800;
+                                ">
+                                    🟢 Пополнение
+                                </div>
+
+                                <div style="
+                                    margin-top:7px;
+                                    color:#777;
+                                    font-size:13px;
+                                ">
+                                    ${operation.date}
+                                </div>
+                            </div>
+
                             <div style="
-                                font-size:17px;
+                                color:#75c66a;
+                                font-size:18px;
                                 font-weight:800;
                             ">
-                                💸 Перевод
-                            </div>
-
-                            <div style="
-                                margin-top:7px;
-                                color:#aaa;
-                            ">
-                                Получатель: ${escapeHTML(operation.recipient)}
-                            </div>
-
-                            <div style="
-                                margin-top:6px;
-                                color:#777;
-                                font-size:13px;
-                            ">
-                                ${operation.date}
+                                +${Number(operation.amount).toLocaleString("ru-RU")}
+                                G-COIN
                             </div>
                         </div>
+                    `;
 
+                } else {
+
+                    item.innerHTML = `
                         <div style="
-                            color:#e7c84b;
-                            font-size:18px;
-                            font-weight:800;
+                            display:flex;
+                            justify-content:space-between;
+                            align-items:center;
                         ">
-                            −${Number(operation.amount).toLocaleString("ru-RU")}
-                            G-COIN
+                            <div>
+                                <div style="
+                                    font-size:17px;
+                                    font-weight:800;
+                                ">
+                                    🔴 Перевод
+                                </div>
+
+                                <div style="
+                                    margin-top:7px;
+                                    color:#aaa;
+                                ">
+                                    Получатель:
+                                    ${escapeHTML(operation.recipient)}
+                                </div>
+
+                                <div style="
+                                    margin-top:6px;
+                                    color:#777;
+                                    font-size:13px;
+                                ">
+                                    ${operation.date}
+                                </div>
+                            </div>
+
+                            <div style="
+                                color:#e7c84b;
+                                font-size:18px;
+                                font-weight:800;
+                            ">
+                                −${Number(operation.amount).toLocaleString("ru-RU")}
+                                G-COIN
+                            </div>
                         </div>
-                    </div>
-                `;
+                    `;
+
+                }
 
 
                 historyList.appendChild(item);
@@ -360,17 +443,63 @@ document.addEventListener("DOMContentLoaded", function () {
             );
 
 
+        updateBalance(balance);
+
+    }
+
+
+    // 💰 ОБНОВИТЬ БАЛАНС
+    function updateBalance(balance) {
+
+        const balanceElement =
+            document.getElementById("balance");
+
         if (balanceElement) {
+
             balanceElement.textContent =
                 "💰 Баланс: " +
-                balance.toLocaleString("ru-RU") +
+                Number(balance).toLocaleString("ru-RU") +
                 " G-COIN";
         }
 
     }
 
 
-    // 🛡️ ЗАЩИТА ТЕКСТА ПОЛУЧАТЕЛЯ
+    // 📊 ПОЛУЧИТЬ ИСТОРИЮ
+    function getHistory() {
+
+        try {
+
+            const history =
+                JSON.parse(
+                    localStorage.getItem("gBankHistory") || "[]"
+                );
+
+            return Array.isArray(history)
+                ? history
+                : [];
+
+        } catch (error) {
+
+            return [];
+
+        }
+
+    }
+
+
+    // 💾 СОХРАНИТЬ ИСТОРИЮ
+    function saveHistory(history) {
+
+        localStorage.setItem(
+            "gBankHistory",
+            JSON.stringify(history)
+        );
+
+    }
+
+
+    // 🛡️ ЗАЩИТА ИМЕНИ ПОЛУЧАТЕЛЯ
     function escapeHTML(text) {
 
         return String(text)
