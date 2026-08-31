@@ -1,48 +1,167 @@
-document.addEventListener("DOMContentLoaded", function () {
+const SUPABASE_URL = "https://lfisabcgwlcqniphoohm.supabase.co";
+const SUPABASE_KEY = "sb_publishable_jwJUmiV1f83556Z6zWKLNw_ekhLufyp";
 
-    const loginOpenBtn = document.getElementById("loginOpenBtn");
-    const authBox = document.getElementById("authBox");
-    const authTitle = document.getElementById("authTitle");
-    const loginName = document.getElementById("loginName");
-    const loginPassword = document.getElementById("loginPassword");
-    const registerPassword = document.getElementById("registerPassword");
-    const authActionBtn = document.getElementById("authActionBtn");
-    const switchAuthBtn = document.getElementById("switchAuthBtn");
+const AUTH_URL = SUPABASE_URL + "/auth/v1";
 
-    let registerMode = false;
+let currentUser = null;
 
 
-    // 🔐 ОТКРЫТЬ ОКНО ВХОДА
+// ===============================
+// 🔐 РЕГИСТРАЦИЯ
+// ===============================
 
-    if (loginOpenBtn) {
+async function registerUser(username, password) {
 
-        loginOpenBtn.addEventListener("click", function () {
+    const email =
+        username.toLowerCase().replace(/\s+/g, "") +
+        "@g-bank.local";
+
+    const response = await fetch(
+        AUTH_URL + "/signup",
+        {
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json",
+                "apikey": SUPABASE_KEY
+            },
+
+            body: JSON.stringify({
+                email: email,
+                password: password
+            })
+        }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+
+        throw new Error(
+            data.msg ||
+            data.message ||
+            "Не удалось создать аккаунт."
+        );
+    }
+
+    return data;
+}
+
+
+// ===============================
+// 🔑 ВХОД
+// ===============================
+
+async function loginUser(username, password) {
+
+    const email =
+        username.toLowerCase().replace(/\s+/g, "") +
+        "@g-bank.local";
+
+    const response = await fetch(
+        AUTH_URL + "/token?grant_type=password",
+        {
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json",
+                "apikey": SUPABASE_KEY
+            },
+
+            body: JSON.stringify({
+                email: email,
+                password: password
+            })
+        }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+
+        throw new Error(
+            data.error_description ||
+            data.msg ||
+            "Неверное имя или пароль."
+        );
+    }
+
+    currentUser = data.user;
+
+    return data;
+}
+
+
+// ===============================
+// 🔐 КНОПКА ВХОДА
+// ===============================
+
+const loginOpenBtn =
+    document.getElementById("loginOpenBtn");
+
+const authBox =
+    document.getElementById("authBox");
+
+const authTitle =
+    document.getElementById("authTitle");
+
+const loginName =
+    document.getElementById("loginName");
+
+const loginPassword =
+    document.getElementById("loginPassword");
+
+const registerPassword =
+    document.getElementById("registerPassword");
+
+const authActionBtn =
+    document.getElementById("authActionBtn");
+
+const switchAuthBtn =
+    document.getElementById("switchAuthBtn");
+
+
+let registerMode = false;
+
+
+if (loginOpenBtn) {
+
+    loginOpenBtn.addEventListener(
+        "click",
+        function () {
 
             authBox.style.display = "block";
 
             registerMode = false;
 
-            authTitle.textContent = "🔐 Вход в G-BANK";
+            authTitle.textContent =
+                "🔐 Вход в G-BANK";
 
-            authActionBtn.textContent = "Войти";
+            authActionBtn.textContent =
+                "Войти";
 
             switchAuthBtn.textContent =
                 "Нет аккаунта? Зарегистрироваться";
 
-            registerPassword.style.display = "none";
+            registerPassword.style.display =
+                "none";
+        }
+    );
+}
 
-        });
 
-    }
+// ===============================
+// 🔄 РЕГИСТРАЦИЯ / ВХОД
+// ===============================
 
+if (switchAuthBtn) {
 
-    // 🔄 ПЕРЕКЛЮЧЕНИЕ ВХОД / РЕГИСТРАЦИЯ
+    switchAuthBtn.addEventListener(
+        "click",
+        function () {
 
-    if (switchAuthBtn) {
-
-        switchAuthBtn.addEventListener("click", function () {
-
-            registerMode = !registerMode;
+            registerMode =
+                !registerMode;
 
 
             if (registerMode) {
@@ -72,28 +191,30 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 registerPassword.style.display =
                     "none";
-
             }
+        }
+    );
+}
 
-        });
 
-    }
+// ===============================
+// 🚀 ДЕЙСТВИЕ ФОРМЫ
+// ===============================
 
+if (authActionBtn) {
 
-    // 🔐 ВХОД / РЕГИСТРАЦИЯ
+    authActionBtn.addEventListener(
+        "click",
+        async function () {
 
-    if (authActionBtn) {
-
-        authActionBtn.addEventListener("click", function () {
-
-            const name =
+            const username =
                 loginName.value.trim();
 
             const password =
                 loginPassword.value;
 
 
-            if (!name) {
+            if (!username) {
 
                 alert("Введите имя клиента.");
 
@@ -101,78 +222,94 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
 
-            if (!password) {
+            if (password.length < 4) {
 
-                alert("Введите пароль.");
+                alert(
+                    "Пароль должен содержать минимум 4 символа."
+                );
 
                 return;
             }
 
 
-            // 📝 РЕГИСТРАЦИЯ
+            try {
 
-            if (registerMode) {
+                authActionBtn.disabled = true;
 
-                const repeatPassword =
-                    registerPassword.value;
+                authActionBtn.textContent =
+                    "Подождите...";
 
 
-                if (password.length < 4) {
+                // =====================
+                // 📝 РЕГИСТРАЦИЯ
+                // =====================
+
+                if (registerMode) {
+
+                    const repeatPassword =
+                        registerPassword.value;
+
+
+                    if (password !== repeatPassword) {
+
+                        alert(
+                            "Пароли не совпадают."
+                        );
+
+                        return;
+                    }
+
+
+                    await registerUser(
+                        username,
+                        password
+                    );
+
 
                     alert(
-                        "Пароль должен содержать минимум 4 символа."
+                        "🎉 Аккаунт G-BANK создан!"
                     );
+
+
+                    registerMode = false;
+
+                    authTitle.textContent =
+                        "🔐 Вход в G-BANK";
+
+                    authActionBtn.textContent =
+                        "Войти";
+
+                    switchAuthBtn.textContent =
+                        "Нет аккаунта? Зарегистрироваться";
+
+                    registerPassword.style.display =
+                        "none";
+
+                    loginPassword.value = "";
 
                     return;
                 }
 
 
-                if (password !== repeatPassword) {
+                // =====================
+                // 🔐 ВХОД
+                // =====================
 
-                    alert(
-                        "Пароли не совпадают."
+                const data =
+                    await loginUser(
+                        username,
+                        password
                     );
 
-                    return;
-                }
 
-
-                if (localStorage.getItem("gBankUser")) {
-
-                    alert(
-                        "Аккаунт уже существует."
-                    );
-
-                    return;
-                }
-
+                localStorage.setItem(
+                    "gBankSession",
+                    data.access_token
+                );
 
                 localStorage.setItem(
                     "gBankUser",
-                    name
-                );
-
-                localStorage.setItem(
-                    "gBankPassword",
-                    password
-                );
-
-                localStorage.setItem(
-                    "gBankBalance",
-                    "12480"
-                );
-
-                localStorage.setItem(
-                    "gBankHistory",
-                    "[]"
-                );
-
-
-                alert(
-                    "🎉 Регистрация завершена!\n\n" +
-                    "Добро пожаловать в G-BANK, " +
-                    name +
-                    "!"
+                    username
                 );
 
 
@@ -180,72 +317,115 @@ document.addEventListener("DOMContentLoaded", function () {
                     "none";
 
 
-                showCabinet(name);
+                showCabinet(username);
 
-                return;
-            }
-
-
-            // 🔐 ВХОД
-
-            const savedUser =
-                localStorage.getItem("gBankUser");
-
-            const savedPassword =
-                localStorage.getItem("gBankPassword");
-
-
-            if (!savedUser) {
 
                 alert(
-                    "❌ Аккаунт не найден.\n\n" +
-                    "Сначала зарегистрируйтесь."
+                    "✅ Вход выполнен!\n\n" +
+                    "Добро пожаловать, " +
+                    username +
+                    "!"
                 );
 
-                return;
-            }
 
-
-            if (
-                name !== savedUser ||
-                password !== savedPassword
-            ) {
+            } catch (error) {
 
                 alert(
-                    "❌ Неверное имя или пароль."
+                    "❌ " +
+                    error.message
                 );
 
-                return;
+            } finally {
+
+                authActionBtn.disabled =
+                    false;
+
+                authActionBtn.textContent =
+                    registerMode
+                        ? "Создать аккаунт"
+                        : "Войти";
             }
 
-
-            alert(
-                "✅ Вход выполнен!\n\n" +
-                "Добро пожаловать, " +
-                savedUser +
-                "!"
-            );
+        }
+    );
+}
 
 
-            authBox.style.display =
-                "none";
+// ===============================
+// 👤 КАБИНЕТ
+// ===============================
+
+function showCabinet(username) {
+
+    const cabinet =
+        document.getElementById("cabinet");
+
+    const welcome =
+        document.getElementById("welcome");
 
 
-            showCabinet(savedUser);
+    if (cabinet) {
 
-        });
-
+        cabinet.style.display =
+            "block";
     }
 
 
-    // 💳 КАРТА
+    if (welcome) {
 
-    const cardBtn =
-        document.getElementById("cardBtn");
+        welcome.textContent =
+            "Добро пожаловать, " +
+            username +
+            "!";
+    }
 
-    if (cardBtn) {
 
-        cardBtn.addEventListener("click", function () {
+    updateBalance();
+
+}
+
+
+// ===============================
+// 💰 БАЛАНС
+// ===============================
+
+function updateBalance() {
+
+    const balanceElement =
+        document.getElementById("balance");
+
+    if (!balanceElement) {
+        return;
+    }
+
+
+    const balance =
+        Number(
+            localStorage.getItem(
+                "gBankBalance"
+            ) || "12480"
+        );
+
+
+    balanceElement.textContent =
+        "💰 Баланс: " +
+        balance.toLocaleString("ru-RU") +
+        " G-COIN";
+}
+
+
+// ===============================
+// 💳 КАРТА
+// ===============================
+
+const cardBtn =
+    document.getElementById("cardBtn");
+
+if (cardBtn) {
+
+    cardBtn.addEventListener(
+        "click",
+        function () {
 
             const card =
                 document.getElementById("myCard");
@@ -253,519 +433,95 @@ document.addEventListener("DOMContentLoaded", function () {
             const cardName =
                 document.getElementById("cardName");
 
+
             if (card) {
                 card.style.display = "block";
             }
 
+
             if (cardName) {
 
                 cardName.textContent =
-                    localStorage.getItem("gBankUser") || "";
-
-            }
-
-        });
-
-    }
-
-
-    // 💸 ПЕРЕВОД
-
-    const transferBtn =
-        document.getElementById("transferBtn");
-
-    if (transferBtn) {
-
-        transferBtn.addEventListener("click", function () {
-
-            const box =
-                document.getElementById("transferBox");
-
-            if (box) {
-                box.style.display = "block";
-            }
-
-        });
-
-    }
-
-
-    // 💸 ОТПРАВИТЬ ПЕРЕВОД
-
-    const sendTransfer =
-        document.getElementById("sendTransfer");
-
-    if (sendTransfer) {
-
-        sendTransfer.addEventListener("click", function () {
-
-            const recipient =
-                document.getElementById("recipient")
-                .value.trim();
-
-            const amount =
-                Number(
-                    document.getElementById("transferAmount")
-                    .value
-                );
-
-
-            if (!recipient) {
-
-                alert(
-                    "Введите имя получателя."
-                );
-
-                return;
-            }
-
-
-            if (!amount || amount <= 0) {
-
-                alert(
-                    "Введите корректную сумму."
-                );
-
-                return;
-            }
-
-
-            const balance =
-                Number(
                     localStorage.getItem(
-                        "gBankBalance"
-                    ) || "0"
-                );
-
-
-            if (amount > balance) {
-
-                alert(
-                    "❌ Недостаточно средств."
-                );
-
-                return;
+                        "gBankUser"
+                    ) || "";
             }
+        }
+    );
+}
 
 
-            const newBalance =
-                balance - amount;
+// ===============================
+// 🚪 ВЫХОД
+// ===============================
 
+const logoutBtn =
+    document.getElementById("logoutBtn");
 
-            localStorage.setItem(
-                "gBankBalance",
-                String(newBalance)
-            );
+if (logoutBtn) {
 
+    logoutBtn.addEventListener(
+        "click",
+        async function () {
 
-            const history =
-                getHistory();
-
-
-            history.unshift({
-
-                type: "transfer",
-
-                recipient: recipient,
-
-                amount: amount,
-
-                date: new Date()
-                    .toLocaleString("ru-RU")
-
-            });
-
-
-            saveHistory(history);
-
-            updateBalance(newBalance);
-
-
-            alert(
-                "✅ Перевод выполнен!\n\n" +
-                "Получатель: " +
-                recipient +
-                "\n" +
-                "Сумма: −" +
-                amount.toLocaleString("ru-RU") +
-                " G-COIN"
-            );
-
-
-            document.getElementById(
-                "recipient"
-            ).value = "";
-
-            document.getElementById(
-                "transferAmount"
-            ).value = "";
-
-        });
-
-    }
-
-
-    // 💰 ПОПОЛНЕНИЕ
-
-    const depositBtn =
-        document.getElementById("depositBtn");
-
-    if (depositBtn) {
-
-        depositBtn.addEventListener("click", function () {
-
-            const box =
-                document.getElementById("depositBox");
-
-            if (box) {
-                box.style.display = "block";
-            }
-
-        });
-
-    }
-
-
-    // 💰 ПОПОЛНИТЬ
-
-    const sendDeposit =
-        document.getElementById("sendDeposit");
-
-    if (sendDeposit) {
-
-        sendDeposit.addEventListener("click", function () {
-
-            const amount =
-                Number(
-                    document.getElementById(
-                        "depositAmount"
-                    ).value
+            const token =
+                localStorage.getItem(
+                    "gBankSession"
                 );
 
 
-            if (!amount || amount <= 0) {
-
-                alert(
-                    "Введите корректную сумму."
-                );
-
-                return;
-            }
-
-
-            const balance =
-                Number(
-                    localStorage.getItem(
-                        "gBankBalance"
-                    ) || "0"
-                );
-
-
-            const newBalance =
-                balance + amount;
-
-
-            localStorage.setItem(
-                "gBankBalance",
-                String(newBalance)
-            );
-
-
-            const history =
-                getHistory();
-
-
-            history.unshift({
-
-                type: "deposit",
-
-                amount: amount,
-
-                date: new Date()
-                    .toLocaleString("ru-RU")
-
-            });
-
-
-            saveHistory(history);
-
-            updateBalance(newBalance);
-
-
-            alert(
-                "✅ Баланс пополнен!\n\n" +
-                "+" +
-                amount.toLocaleString("ru-RU") +
-                " G-COIN"
-            );
-
-
-            document.getElementById(
-                "depositAmount"
-            ).value = "";
-
-        });
-
-    }
-
-
-    // 📊 ИСТОРИЯ
-
-    const historyBtn =
-        document.getElementById("historyBtn");
-
-    if (historyBtn) {
-
-        historyBtn.addEventListener("click", function () {
-
-            const historyBox =
-                document.getElementById("historyBox");
-
-            const historyList =
-                document.getElementById("historyList");
-
-
-            if (!historyBox || !historyList) {
-
-                alert(
-                    "Блок истории не найден."
-                );
-
-                return;
-            }
-
-
-            const history =
-                getHistory();
-
-
-            historyBox.style.display =
-                "block";
-
-
-            if (history.length === 0) {
-
-                historyList.innerHTML =
-                    "<p style='color:#999;text-align:center;'>📭 Операций пока нет</p>";
-
-                return;
-            }
-
-
-            historyList.innerHTML = "";
-
-
-            history.forEach(function (operation) {
-
-                const item =
-                    document.createElement("div");
-
-
-                item.style.padding =
-                    "18px 0";
-
-                item.style.borderBottom =
-                    "1px solid rgba(255,255,255,.08)";
-
-
-                if (operation.type === "deposit") {
-
-                    item.innerHTML =
-
-                        "<div style='display:flex;justify-content:space-between;'>" +
-
-                        "<div>" +
-
-                        "<b>🟢 Пополнение</b>" +
-
-                        "<div style='color:#777;margin-top:6px;'>" +
-                        operation.date +
-                        "</div>" +
-
-                        "</div>" +
-
-                        "<strong style='color:#65c76a;'>" +
-                        "+" +
-                        Number(operation.amount)
-                            .toLocaleString("ru-RU") +
-                        " G-COIN" +
-                        "</strong>" +
-
-                        "</div>";
-
-                } else {
-
-                    item.innerHTML =
-
-                        "<div style='display:flex;justify-content:space-between;'>" +
-
-                        "<div>" +
-
-                        "<b>🔴 Перевод</b>" +
-
-                        "<div style='color:#aaa;margin-top:6px;'>" +
-                        "Получатель: " +
-                        escapeHTML(operation.recipient) +
-                        "</div>" +
-
-                        "<div style='color:#777;margin-top:6px;'>" +
-                        operation.date +
-                        "</div>" +
-
-                        "</div>" +
-
-                        "<strong style='color:#e7c84b;'>" +
-                        "−" +
-                        Number(operation.amount)
-                            .toLocaleString("ru-RU") +
-                        " G-COIN" +
-                        "</strong>" +
-
-                        "</div>";
+            if (token) {
+
+                try {
+
+                    await fetch(
+                        AUTH_URL + "/logout",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "apikey": SUPABASE_KEY,
+                                "Authorization":
+                                    "Bearer " + token
+                            }
+                        }
+                    );
+
+                } catch (error) {
+
+                    console.log(
+                        "Ошибка выхода:",
+                        error
+                    );
                 }
+            }
 
 
-                historyList.appendChild(item);
+            localStorage.removeItem(
+                "gBankSession"
+            );
 
-            });
+            localStorage.removeItem(
+                "gBankUser"
+            );
 
-        });
-
-    }
-
-
-    // 🚪 ВЫХОД
-
-    const logoutBtn =
-        document.getElementById("logoutBtn");
-
-    if (logoutBtn) {
-
-        logoutBtn.addEventListener("click", function () {
-
-            localStorage.removeItem("gBankUser");
-            localStorage.removeItem("gBankPassword");
-            localStorage.removeItem("gBankBalance");
 
             const cabinet =
-                document.getElementById("cabinet");
+                document.getElementById(
+                    "cabinet"
+                );
+
 
             if (cabinet) {
-                cabinet.style.display = "none";
+
+                cabinet.style.display =
+                    "none";
             }
+
 
             alert(
                 "Вы вышли из G-BANK."
             );
-
-        });
-
-    }
-
-
-    // 💰 БАЛАНС
-
-    function updateBalance(balance) {
-
-        const element =
-            document.getElementById("balance");
-
-        if (element) {
-
-            element.textContent =
-                "💰 Баланс: " +
-                Number(balance)
-                    .toLocaleString("ru-RU") +
-                " G-COIN";
-
         }
-
-    }
-
-
-    // 📊 ИСТОРИЯ
-
-    function getHistory() {
-
-        try {
-
-            const history =
-                JSON.parse(
-                    localStorage.getItem(
-                        "gBankHistory"
-                    ) || "[]"
-                );
-
-            return Array.isArray(history)
-                ? history
-                : [];
-
-        } catch (error) {
-
-            return [];
-
-        }
-
-    }
-
-
-    function saveHistory(history) {
-
-        localStorage.setItem(
-            "gBankHistory",
-            JSON.stringify(history)
-        );
-
-    }
-
-
-    // 👤 КАБИНЕТ
-
-    function showCabinet(user) {
-
-        const cabinet =
-            document.getElementById("cabinet");
-
-        const welcome =
-            document.getElementById("welcome");
-
-
-        if (cabinet) {
-            cabinet.style.display = "block";
-        }
-
-
-        if (welcome) {
-
-            welcome.textContent =
-                "Добро пожаловать, " +
-                user +
-                "!";
-        }
-
-
-        updateBalance(
-            Number(
-                localStorage.getItem(
-                    "gBankBalance"
-                ) || "12480"
-            )
-        );
-
-    }
-
-
-    // 🛡️ ЗАЩИТА ТЕКСТА
-
-    function escapeHTML(text) {
-
-        return String(text)
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-
-    }
-
-});
+    );
+}
