@@ -10,11 +10,7 @@ let currentUser = null;
 // 🔐 РЕГИСТРАЦИЯ
 // ===============================
 
-async function registerUser(username, password) {
-
-    const email =
-        username.toLowerCase().replace(/\s+/g, "") +
-        "@g-bank.local";
+async function registerUser(username, email, password) {
 
     const response = await fetch(
         AUTH_URL + "/signup",
@@ -28,7 +24,11 @@ async function registerUser(username, password) {
 
             body: JSON.stringify({
                 email: email,
-                password: password
+                password: password,
+
+                data: {
+                    username: username
+                }
             })
         }
     );
@@ -40,6 +40,7 @@ async function registerUser(username, password) {
         throw new Error(
             data.msg ||
             data.message ||
+            data.error_description ||
             "Не удалось создать аккаунт."
         );
     }
@@ -52,11 +53,7 @@ async function registerUser(username, password) {
 // 🔑 ВХОД
 // ===============================
 
-async function loginUser(username, password) {
-
-    const email =
-        username.toLowerCase().replace(/\s+/g, "") +
-        "@g-bank.local";
+async function loginUser(email, password) {
 
     const response = await fetch(
         AUTH_URL + "/token?grant_type=password",
@@ -82,7 +79,8 @@ async function loginUser(username, password) {
         throw new Error(
             data.error_description ||
             data.msg ||
-            "Неверное имя или пароль."
+            data.message ||
+            "Неверный Email или пароль."
         );
     }
 
@@ -111,6 +109,9 @@ const loginName =
 const loginPassword =
     document.getElementById("loginPassword");
 
+const registerEmail =
+    document.getElementById("registerEmail");
+
 const registerPassword =
     document.getElementById("registerPassword");
 
@@ -123,6 +124,10 @@ const switchAuthBtn =
 
 let registerMode = false;
 
+
+// ===============================
+// 🔓 ОТКРЫТИЕ ФОРМЫ
+// ===============================
 
 if (loginOpenBtn) {
 
@@ -143,8 +148,16 @@ if (loginOpenBtn) {
             switchAuthBtn.textContent =
                 "Нет аккаунта? Зарегистрироваться";
 
+            if (registerEmail) {
+                registerEmail.style.display =
+                    "none";
+            }
+
             registerPassword.style.display =
                 "none";
+
+            loginName.placeholder =
+                "Email";
         }
     );
 }
@@ -175,8 +188,16 @@ if (switchAuthBtn) {
                 switchAuthBtn.textContent =
                     "Уже есть аккаунт? Войти";
 
+                if (registerEmail) {
+                    registerEmail.style.display =
+                        "block";
+                }
+
                 registerPassword.style.display =
                     "block";
+
+                loginName.placeholder =
+                    "Имя клиента";
 
             } else {
 
@@ -189,8 +210,16 @@ if (switchAuthBtn) {
                 switchAuthBtn.textContent =
                     "Нет аккаунта? Зарегистрироваться";
 
+                if (registerEmail) {
+                    registerEmail.style.display =
+                        "none";
+                }
+
                 registerPassword.style.display =
                     "none";
+
+                loginName.placeholder =
+                    "Email";
             }
         }
     );
@@ -213,57 +242,115 @@ if (authActionBtn) {
             const password =
                 loginPassword.value;
 
+            // =====================
+            // 📝 РЕГИСТРАЦИЯ
+            // =====================
 
-            if (!username) {
+            if (registerMode) {
 
-                alert("Введите имя клиента.");
+                const email =
+                    registerEmail
+                        ? registerEmail.value.trim()
+                        : "";
 
-                return;
-            }
-
-
-            if (password.length < 4) {
-
-                alert(
-                    "Пароль должен содержать минимум 4 символа."
-                );
-
-                return;
-            }
+                const repeatPassword =
+                    registerPassword.value;
 
 
-            try {
+                if (!username) {
 
-                authActionBtn.disabled = true;
+                    alert(
+                        "Введите имя клиента."
+                    );
 
-                authActionBtn.textContent =
-                    "Подождите...";
-
-
-                // =====================
-                // 📝 РЕГИСТРАЦИЯ
-                // =====================
-
-                if (registerMode) {
-
-                    const repeatPassword =
-                        registerPassword.value;
+                    return;
+                }
 
 
-                    if (password !== repeatPassword) {
+                if (!email) {
 
-                        alert(
-                            "Пароли не совпадают."
-                        );
+                    alert(
+                        "Введите Email."
+                    );
 
-                        return;
-                    }
+                    return;
+                }
+
+
+                if (!email.includes("@")) {
+
+                    alert(
+                        "Введите корректный Email."
+                    );
+
+                    return;
+                }
+
+
+                if (!password) {
+
+                    alert(
+                        "Введите пароль."
+                    );
+
+                    return;
+                }
+
+
+                if (password.length < 6) {
+
+                    alert(
+                        "Пароль должен содержать минимум 6 символов."
+                    );
+
+                    return;
+                }
+
+
+                if (password !== repeatPassword) {
+
+                    alert(
+                        "Пароли не совпадают."
+                    );
+
+                    return;
+                }
+
+
+                try {
+
+                    authActionBtn.disabled = true;
+
+                    authActionBtn.textContent =
+                        "Создаём аккаунт...";
 
 
                     await registerUser(
                         username,
+                        email,
                         password
                     );
+
+
+                    // Сохраняем имя клиента
+                    localStorage.setItem(
+                        "gBankUser",
+                        username
+                    );
+
+
+                    // Начальный баланс
+                    if (
+                        !localStorage.getItem(
+                            "gBankBalance"
+                        )
+                    ) {
+
+                        localStorage.setItem(
+                            "gBankBalance",
+                            "12480"
+                        );
+                    }
 
 
                     alert(
@@ -271,7 +358,9 @@ if (authActionBtn) {
                     );
 
 
-                    registerMode = false;
+                    registerMode =
+                        false;
+
 
                     authTitle.textContent =
                         "🔐 Вход в G-BANK";
@@ -282,18 +371,78 @@ if (authActionBtn) {
                     switchAuthBtn.textContent =
                         "Нет аккаунта? Зарегистрироваться";
 
+
+                    if (registerEmail) {
+                        registerEmail.style.display =
+                            "none";
+                    }
+
                     registerPassword.style.display =
                         "none";
 
-                    loginPassword.value = "";
 
-                    return;
+                    loginName.value =
+                        email;
+
+                    loginPassword.value =
+                        "";
+
+
+                } catch (error) {
+
+                    alert(
+                        "❌ " +
+                        error.message
+                    );
+
+                } finally {
+
+                    authActionBtn.disabled =
+                        false;
+
+                    authActionBtn.textContent =
+                        registerMode
+                            ? "Создать аккаунт"
+                            : "Войти";
                 }
 
 
-                // =====================
-                // 🔐 ВХОД
-                // =====================
+                return;
+            }
+
+
+            // =====================
+            // 🔐 ВХОД
+            // =====================
+
+            if (!username) {
+
+                alert(
+                    "Введите Email."
+                );
+
+                return;
+            }
+
+
+            if (!password) {
+
+                alert(
+                    "Введите пароль."
+                );
+
+                return;
+            }
+
+
+            try {
+
+                authActionBtn.disabled =
+                    true;
+
+                authActionBtn.textContent =
+                    "Входим...";
+
 
                 const data =
                     await loginUser(
@@ -302,28 +451,61 @@ if (authActionBtn) {
                     );
 
 
+                // Сохраняем сессию
                 localStorage.setItem(
                     "gBankSession",
                     data.access_token
                 );
 
+
+                // Если Supabase передал имя
+                const supabaseUsername =
+                    data.user &&
+                    data.user.user_metadata &&
+                    data.user.user_metadata.username;
+
+
+                const finalUsername =
+                    supabaseUsername ||
+                    localStorage.getItem(
+                        "gBankUser"
+                    ) ||
+                    username;
+
+
                 localStorage.setItem(
                     "gBankUser",
-                    username
+                    finalUsername
                 );
+
+
+                // Начальный баланс
+                if (
+                    !localStorage.getItem(
+                        "gBankBalance"
+                    )
+                ) {
+
+                    localStorage.setItem(
+                        "gBankBalance",
+                        "12480"
+                    );
+                }
 
 
                 authBox.style.display =
                     "none";
 
 
-                showCabinet(username);
+                showCabinet(
+                    finalUsername
+                );
 
 
                 alert(
                     "✅ Вход выполнен!\n\n" +
                     "Добро пожаловать, " +
-                    username +
+                    finalUsername +
                     "!"
                 );
 
@@ -345,7 +527,6 @@ if (authActionBtn) {
                         ? "Создать аккаунт"
                         : "Войти";
             }
-
         }
     );
 }
@@ -381,7 +562,6 @@ function showCabinet(username) {
 
 
     updateBalance();
-
 }
 
 
@@ -393,6 +573,7 @@ function updateBalance() {
 
     const balanceElement =
         document.getElementById("balance");
+
 
     if (!balanceElement) {
         return;
@@ -421,6 +602,7 @@ function updateBalance() {
 const cardBtn =
     document.getElementById("cardBtn");
 
+
 if (cardBtn) {
 
     cardBtn.addEventListener(
@@ -428,14 +610,20 @@ if (cardBtn) {
         function () {
 
             const card =
-                document.getElementById("myCard");
+                document.getElementById(
+                    "myCard"
+                );
 
             const cardName =
-                document.getElementById("cardName");
+                document.getElementById(
+                    "cardName"
+                );
 
 
             if (card) {
-                card.style.display = "block";
+
+                card.style.display =
+                    "block";
             }
 
 
@@ -456,7 +644,10 @@ if (cardBtn) {
 // ===============================
 
 const logoutBtn =
-    document.getElementById("logoutBtn");
+    document.getElementById(
+        "logoutBtn"
+    );
+
 
 if (logoutBtn) {
 
@@ -480,9 +671,12 @@ if (logoutBtn) {
                             method: "POST",
 
                             headers: {
-                                "apikey": SUPABASE_KEY,
+                                "apikey":
+                                    SUPABASE_KEY,
+
                                 "Authorization":
-                                    "Bearer " + token
+                                    "Bearer " +
+                                    token
                             }
                         }
                     );
